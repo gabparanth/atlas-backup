@@ -11,7 +11,7 @@ const group_id = config.group_id;
 const db_username = config.db_username;
 const db_password = config.db_password;
 
-const instance_tiers = "M10";
+const instance_tiers = "M50";
 const interval = 10000; // 10s
 
 const source_cluster = "Prod"; // prod cluster
@@ -119,7 +119,7 @@ async function get_snapshot_status(cluster_name, snapshotId) {
 async function create_cluster(name, instance_tiers, callback) {
   var body_create_cluster = {
     name: name,
-    diskSizeGB: 100,
+    diskSizeGB: 2100,
     numShards: 1,
     providerSettings: {
       providerName: "GCP",
@@ -398,16 +398,18 @@ async function dump_restore_task(dump_cluster, restore_cluster) {
 
   console.log(" ************   " + cmd_dump + "  *************");
 
-  exec(cmd_dump, (error, stdout, stderr) => {
+  await exec(cmd_dump, (error, stdout, stderr) => {
     if (error) {
       console.log(`error: ${error.message}`);
-      return;
+      // return;
     }
     if (stderr) {
       console.log(`stderr: ${stderr}`);
-      return;
+      // return;
     }
     console.log(`stdout: ${stdout}`);
+  }).on("close", (code) => {
+    console.log(`child process exited with code ${code}`);
   });
 }
 
@@ -427,20 +429,20 @@ async function app() {
       return dump_restore_task(cluster_name, test_cluster);
     })
     .then(() => {
-      var endTime = new Date();
-      console.log("process ending at : " + endTime);
-
-      console.log(
-        "process executed in : " +
-          ~~((endTime - startTime) / 1000 / 60) +
-          " min and " +
-          (((endTime - startTime) / 1000) % 60) +
-          "seconds"
-      );
-      return remove_cluster(cluster_name);
+      // console.log("process ending at : " + endTime);
+      // console.log(
+      //   "process executed in : " +
+      //     ~~((endTime - startTime) / 1000 / 60) +
+      //     " min and " +
+      //     (((endTime - startTime) / 1000) % 60) +
+      //     "seconds"
+      // );
+      // return remove_cluster(cluster_name);
     });
 
   Promise.resolve();
+  // var endTime = new Date();
+  // console.log("END : " + endTime);
 }
 
 app();
